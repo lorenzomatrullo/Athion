@@ -91,7 +91,7 @@ struct AddSessionFlowView: View {
                         
                         // Inline exercise entry card
                         if isAddingExercise {
-                            ExerciseEntryCard(name: $exName, setsText: $exSetsText, reps: $exReps, onSave: saveExercise, canSave: canSaveExercise)
+                            AddingExerciseCard(name: $exName, setsText: $exSetsText, reps: $exReps, onSave: saveExercise, canSave: canSaveExercise)
                                 .padding(.horizontal, 16)
                         }
                         

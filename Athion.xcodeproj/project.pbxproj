@@ -12,7 +12,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		844702022EC3B3BB00DE9E82 /* Athion.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = Athion.app; path = "/Users/lorenzomatrullo/Desktop/Athion/build/Debug-iphoneos/Athion.app"; sourceTree = "<absolute>"; };
+		8474344D2EC3B4820045CA67 /* Athion.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Athion.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		84D4D80F2EC3325D00C2F5D6 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		84D4D81E2EC3379500C2F5D6 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -42,6 +42,7 @@
 				84C3A9EC2EC2337200C2F36E /* Athion */,
 				84D4D80F2EC3325D00C2F5D6 /* .gitignore */,
 				84D4D81E2EC3379500C2F5D6 /* LICENSE */,
+				8474344D2EC3B4820045CA67 /* Athion.app */,
 			);
 			sourceTree = "<group>";
 		};
@@ -67,7 +68,7 @@
 			packageProductDependencies = (
 			);
 			productName = Athion;
-			productReference = 844702022EC3B3BB00DE9E82 /* Athion.app */;
+			productReference = 8474344D2EC3B4820045CA67 /* Athion.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */

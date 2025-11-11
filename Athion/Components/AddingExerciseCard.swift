@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct ExerciseEntryCard: View {
+struct AddingExerciseCard: View {
     @Binding var name: String
     @Binding var setsText: String
     @Binding var reps: String
@@ -12,7 +12,8 @@ struct ExerciseEntryCard: View {
             TextField("Exercise Name", text: $name)
                 .textInputAutocapitalization(.words)
                 .foregroundColor(.white)
-                .padding(.vertical, 10)
+                .padding(.top, 12)
+                .padding(.bottom, 6)
                 .padding(.horizontal, 12)
             
             Divider().overlay(Color.white.opacity(0.15))
@@ -21,7 +22,8 @@ struct ExerciseEntryCard: View {
             TextField("Number of Sets", text: $setsText)
                 .keyboardType(.numberPad)
                 .foregroundColor(.white)
-                .padding(.vertical, 10)
+                .padding(.top, 12)
+                .padding(.bottom, 6)
                 .padding(.horizontal, 12)
             
             Divider().overlay(Color.white.opacity(0.15))
@@ -29,7 +31,8 @@ struct ExerciseEntryCard: View {
             
             TextField("Rep Range", text: $reps)
                 .foregroundColor(.white)
-                .padding(.vertical, 10)
+                .padding(.top, 12)
+                .padding(.bottom, 2)
                 .padding(.horizontal, 12)
             
             Divider().overlay(Color.white.opacity(0.15))
@@ -57,7 +60,7 @@ struct ExerciseEntryCard: View {
 #Preview {
     ZStack {
         CustomBackgroundView()
-        ExerciseEntryCard(name: .constant(""), setsText: .constant(""), reps: .constant(""), onSave: {}, canSave: true)
+        AddingExerciseCard(name: .constant(""), setsText: .constant(""), reps: .constant(""), onSave: {}, canSave: true)
             .padding()
     }
     .preferredColorScheme(.dark)
