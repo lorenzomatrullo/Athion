@@ -3,6 +3,7 @@ import AuthenticationServices
 
 struct OnboardingView: View {
     var onContinue: () -> Void = {}
+    @State private var showSkipConfirm: Bool = false
     
     var body: some View {
         NavigationStack {
@@ -81,7 +82,17 @@ struct OnboardingView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Skip") {
-                        onContinue()
+                        showSkipConfirm = true
+                    }
+                    .confirmationDialog(
+                        "Continue without signing in?",
+                        isPresented: $showSkipConfirm,
+                        titleVisibility: .visible
+                    ) {
+                        Button("Continue") { onContinue() }
+                        Button("Cancel", role: .cancel) { }
+                    } message: {
+                        Text("Your data will be stored only on this device and won’t sync across devices. You can sign in later from the profile tab.")
                     }
                 }
             }
