@@ -12,15 +12,15 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		84C3A9EA2EC2337200C2F36E /* Athion.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Athion.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		84C3A9EA2EC2337200C2F36E /* Athion.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = Athion.app; path = "/Users/lorenzomatrullo/Desktop/app-test/build/Debug-iphoneos/Athion.app"; sourceTree = "<absolute>"; };
 		84D4D80F2EC3325D00C2F5D6 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		84D4D81E2EC3379500C2F5D6 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		84C3A9EC2EC2337200C2F36E /* app-test */ = {
+		84C3A9EC2EC2337200C2F36E /* Athion */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "app-test";
+			path = Athion;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -39,19 +39,10 @@
 		84C3A9E12EC2337200C2F36E = {
 			isa = PBXGroup;
 			children = (
-				84C3A9EC2EC2337200C2F36E /* app-test */,
-				84C3A9EB2EC2337200C2F36E /* Products */,
+				84C3A9EC2EC2337200C2F36E /* Athion */,
 				84D4D80F2EC3325D00C2F5D6 /* .gitignore */,
 				84D4D81E2EC3379500C2F5D6 /* LICENSE */,
 			);
-			sourceTree = "<group>";
-		};
-		84C3A9EB2EC2337200C2F36E /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				84C3A9EA2EC2337200C2F36E /* Athion.app */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -70,12 +61,12 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				84C3A9EC2EC2337200C2F36E /* app-test */,
+				84C3A9EC2EC2337200C2F36E /* Athion */,
 			);
-			name = "Athion";
+			name = Athion;
 			packageProductDependencies = (
 			);
-			productName = "Athion";
+			productName = Athion;
 			productReference = 84C3A9EA2EC2337200C2F36E /* Athion.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -104,7 +95,7 @@
 			mainGroup = 84C3A9E12EC2337200C2F36E;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = 84C3A9EB2EC2337200C2F36E /* Products */;
+			productRefGroup = 84C3A9E12EC2337200C2F36E;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (

@@ -1,0 +1,34 @@
+import Foundation
+import SwiftData
+
+@Model
+final class WorkoutSessionRecord {
+    @Attribute(.unique) var id: UUID
+    var name: String
+    var date: Date
+    @Relationship(deleteRule: .cascade, inverse: \ExerciseRecord.session) var exercises: [ExerciseRecord] = []
+    
+    init(id: UUID = UUID(), name: String, date: Date = Date()) {
+        self.id = id
+        self.name = name
+        self.date = date
+    }
+}
+
+@Model
+final class ExerciseRecord {
+    @Attribute(.unique) var id: UUID
+    var name: String
+    var sets: Int
+    var reps: String
+    
+    var session: WorkoutSessionRecord?
+    
+    init(id: UUID = UUID(), name: String, sets: Int, reps: String, session: WorkoutSessionRecord? = nil) {
+        self.id = id
+        self.name = name
+        self.sets = sets
+        self.reps = reps
+        self.session = session
+    }
+}

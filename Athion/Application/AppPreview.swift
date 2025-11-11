@@ -37,4 +37,3 @@ struct AppPreview: View {
     AppPreview()
         .preferredColorScheme(.dark)
 }
-

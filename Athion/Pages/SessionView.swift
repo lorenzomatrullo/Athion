@@ -2,9 +2,8 @@ import SwiftUI
 import UIKit
 
 struct SessionView: View {
-    @State private var workoutSessions: [WorkoutSession] = WorkoutSession.sampleSessions
-    @State private var showingMenu = false
-    @State private var selectedSession: WorkoutSession?
+    @State private var workoutSessions: [WorkoutSession] = []
+    @State private var showingAddSession = false
     
     init() {
         // Configure navigation bar appearance for dark theme
@@ -22,7 +21,18 @@ struct SessionView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                BlurredBackgroundView()
+                CustomBackgroundView()
+                
+                // Navigation to Add Session page
+                NavigationLink(isActive: $showingAddSession) {
+                    AddSessionFlowView { newSession in
+                        workoutSessions.insert(newSession, at: 0)
+                    }
+                    .preferredColorScheme(.dark)
+                } label: {
+                    EmptyView()
+                }
+                .hidden()
                 
                 ScrollView {
                     VStack(spacing: 16) {
@@ -30,8 +40,7 @@ struct SessionView: View {
                             WorkoutSessionCard(
                                 session: session,
                                 onTap: {
-                                    // Navigate to workout detail/active view
-                                    selectedSession = session
+                                    // tap handling could navigate to details in future
                                 },
                                 onDelete: {
                                     if let index = workoutSessions.firstIndex(where: { $0.id == session.id }) {
@@ -76,7 +85,7 @@ struct SessionView: View {
     }
     
     private func startNewWorkout() {
-        // Handle starting a new workout
+        showingAddSession = true
     }
 }
 
@@ -84,4 +93,3 @@ struct SessionView: View {
     SessionView()
         .preferredColorScheme(.dark)
 }
-

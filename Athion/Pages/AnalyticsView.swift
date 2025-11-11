@@ -1,14 +1,14 @@
 import SwiftUI
 
-struct ProfileView: View {
+struct AnalyticsView: View {
     var body: some View {
         ZStack {
-            BlurredBackgroundView()
+            CustomBackgroundView()
         }
     }
 }
 
 #Preview {
-    ProfileView()
+    AnalyticsView()
 }
 

@@ -76,11 +76,11 @@ struct WorkoutSessionCard: View {
 
 #Preview {
     ZStack {
-        BlurredBackgroundView()
+        CustomBackgroundView()
         
         VStack(spacing: 16) {
             WorkoutSessionCard(
-                session: WorkoutSession.sampleSessions[0],
+                session: WorkoutSession(name: "Preview Session", exerciseCount: 3, date: Date(), status: .template),
                 onTap: {},
                 onDelete: {}
             )

@@ -1,7 +1,7 @@
 import SwiftUI
 import UIKit
 
-struct BlurredBackgroundView: View {
+struct CustomBackgroundView: View {
     var body: some View {
         ZStack {
             Color.black
@@ -50,5 +50,5 @@ private struct BlurView: UIViewRepresentable {
 }
 
 #Preview {
-    BlurredBackgroundView()
+    CustomBackgroundView()
 }
