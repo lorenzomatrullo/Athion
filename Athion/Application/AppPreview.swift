@@ -26,7 +26,7 @@ struct AppPreview: View {
             
             ProfileView()
                 .tabItem {
-                    Label("Profile", systemImage: "person.crop.circle")
+                    Label("Profile", systemImage: "person")
                 }
         }
         .accentColor(.white)
