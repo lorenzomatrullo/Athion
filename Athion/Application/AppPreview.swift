@@ -2,6 +2,7 @@ import SwiftUI
 import UIKit
 
 struct AppPreview: View {
+    @AppStorage("isSignedIn") private var isSignedIn: Bool = false
     init() {
         let appearance = UITabBarAppearance()
         appearance.configureWithOpaqueBackground()
@@ -26,7 +27,11 @@ struct AppPreview: View {
             
             ProfileView()
                 .tabItem {
-                    Label("Profile", systemImage: "person")
+                    Label {
+                        Text("Profile")
+                    } icon: {
+                        Image(systemName: isSignedIn ? "person" : "person.badge.shield.exclamationmark")
+                    }
                 }
         }
         .accentColor(.white)
