@@ -27,25 +27,42 @@ struct SessionView: View {
                 
                 ScrollView {
                     VStack(spacing: 16) {
-                        ForEach(Array(sessionRecords.prefix(4)), id: \.id) { record in
-                            let session = WorkoutSession(
-                                id: record.id,
-                                name: record.name,
-                                exerciseCount: record.exercises.count,
-                                date: record.date,
-                                status: .template
-                            )
-                            WorkoutSessionCard(
-                                session: session,
-                                onTap: {
-                                    // tap handling could navigate to details in future
-                                },
-                                onDelete: {
-                                    modelContext.delete(record)
-                                    try? modelContext.save()
-                                }
-                            )
+                        if sessionRecords.isEmpty {
+                            VStack(spacing: 8) {
+                                Image(systemName: "dumbbell.fill")
+                                    .font(.system(size: 28, weight: .semibold))
+                                    .foregroundColor(.white.opacity(0.7))
+                                Text("No sessions yet")
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                Text("Tap the + button to add your first workout.")
+                                    .font(.subheadline)
+                                    .foregroundColor(.white.opacity(0.7))
+                            }
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .padding(.vertical, 60)
                             .padding(.horizontal, 16)
+                        } else {
+                            ForEach(Array(sessionRecords.prefix(4)), id: \.id) { record in
+                                let session = WorkoutSession(
+                                    id: record.id,
+                                    name: record.name,
+                                    exerciseCount: record.exercises.count,
+                                    date: record.date,
+                                    status: .template
+                                )
+                                WorkoutSessionCard(
+                                    session: session,
+                                    onTap: {
+                                        // tap handling could navigate to details in future
+                                    },
+                                    onDelete: {
+                                        modelContext.delete(record)
+                                        try? modelContext.save()
+                                    }
+                                )
+                                .padding(.horizontal, 16)
+                            }
                         }
                     }
                     .padding(.top, 16)
@@ -79,7 +96,7 @@ struct SessionView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
             .navigationDestination(isPresented: $showingAddSession) {
-                // We render from SwiftData via @Query, so we don't need to mutate local state here.
+                // Render from SwiftData via @Query, no need to mutate local state here.
                 AddSessionFlowView { _ in }
                     .preferredColorScheme(.dark)
             }
