@@ -1,8 +1,10 @@
 import SwiftUI
 import UIKit
+import SwiftData
 
 struct SessionView: View {
-    @State private var workoutSessions: [WorkoutSession] = []
+    @Environment(\.modelContext) private var modelContext
+    @Query(sort: \WorkoutSessionRecord.date, order: .reverse) private var sessionRecords: [WorkoutSessionRecord]
     @State private var showingAddSession = false
     
     init() {
@@ -25,10 +27,9 @@ struct SessionView: View {
                 
                 // Navigation to Add Session page
                 NavigationLink(isActive: $showingAddSession) {
-                    AddSessionFlowView { newSession in
-                        workoutSessions.insert(newSession, at: 0)
-                    }
-                    .preferredColorScheme(.dark)
+                    // We render from SwiftData via @Query, so we don't need to mutate local state here.
+                    AddSessionFlowView { _ in }
+                        .preferredColorScheme(.dark)
                 } label: {
                     EmptyView()
                 }
@@ -36,16 +37,22 @@ struct SessionView: View {
                 
                 ScrollView {
                     VStack(spacing: 16) {
-                        ForEach(Array(workoutSessions.prefix(4))) { session in
+                        ForEach(Array(sessionRecords.prefix(4)), id: \.id) { record in
+                            let session = WorkoutSession(
+                                id: record.id,
+                                name: record.name,
+                                exerciseCount: record.exercises.count,
+                                date: record.date,
+                                status: .template
+                            )
                             WorkoutSessionCard(
                                 session: session,
                                 onTap: {
                                     // tap handling could navigate to details in future
                                 },
                                 onDelete: {
-                                    if let index = workoutSessions.firstIndex(where: { $0.id == session.id }) {
-                                        workoutSessions.remove(at: index)
-                                    }
+                                    modelContext.delete(record)
+                                    try? modelContext.save()
                                 }
                             )
                             .padding(.horizontal, 16)

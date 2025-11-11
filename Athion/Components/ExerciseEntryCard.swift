@@ -48,7 +48,7 @@ struct ExerciseEntryCard: View {
             }
             .disabled(!canSave)
             .opacity(canSave ? 1.0 : 0.5)
-            .padding(.bottom, 8)
+            .padding(.bottom, -2)
         }
         .glassCard(cornerRadius: 18, padding: 16)
     }

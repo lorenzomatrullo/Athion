@@ -51,6 +51,7 @@ struct WorkoutSessionCard: View {
                     Text(exerciseCountText)
                         .font(.subheadline)
                         .foregroundColor(CardStyleHelpers.secondaryText)
+                        .offset(y: -5)
                     
                     Spacer()
                 }
