@@ -25,16 +25,6 @@ struct SessionView: View {
             ZStack {
                 CustomBackgroundView()
                 
-                // Navigation to Add Session page
-                NavigationLink(isActive: $showingAddSession) {
-                    // We render from SwiftData via @Query, so we don't need to mutate local state here.
-                    AddSessionFlowView { _ in }
-                        .preferredColorScheme(.dark)
-                } label: {
-                    EmptyView()
-                }
-                .hidden()
-                
                 ScrollView {
                     VStack(spacing: 16) {
                         ForEach(Array(sessionRecords.prefix(4)), id: \.id) { record in
@@ -87,6 +77,11 @@ struct SessionView: View {
                 .padding(.leading, 20)
                 .padding(.top, -50)
                 .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .navigationDestination(isPresented: $showingAddSession) {
+                // We render from SwiftData via @Query, so we don't need to mutate local state here.
+                AddSessionFlowView { _ in }
+                    .preferredColorScheme(.dark)
             }
         }
     }
