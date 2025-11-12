@@ -33,38 +33,12 @@ struct SessionOverviewView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     // Session name
-                    if isEditing {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Name")
-                                .font(.footnote)
-                                .foregroundColor(.white.opacity(0.7))
-                            TextField("e.g., Push Day", text: $sessionName)
-                                .textInputAutocapitalization(.words)
-                                .foregroundColor(.white)
-                                .padding(.vertical, 10)
-                                .padding(.horizontal, 12)
-                                .frame(minHeight: nameRowMinHeight)
-                                .glassCard(cornerRadius: 18, padding: 0)
-                        }
-                        .padding(.horizontal, 16)
-                    } else {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Name")
-                                .font(.footnote)
-                                .foregroundColor(.white.opacity(0.7))
-                            HStack {
-                                Text(record.name)
-                                    .foregroundColor(.white)
-                                    .fontWeight(.semibold)
-                                Spacer()
-                            }
-                            .padding(.vertical, 10)
-                            .padding(.horizontal, 12)
-                            .frame(minHeight: nameRowMinHeight)
-                            .glassCard(cornerRadius: 18, padding: 0)
-                        }
-                        .padding(.horizontal, 16)
-                    }
+                    SessionNameRow(
+                        isEditing: isEditing,
+                        sessionName: $sessionName,
+                        recordName: record.name,
+                        rowMinHeight: nameRowMinHeight
+                    )
                     
                     // Exercises header
                     Text("Exercises")
@@ -110,25 +84,7 @@ struct SessionOverviewView: View {
                             .padding(.horizontal, 16)
                         } else {
                             if !record.exercises.isEmpty {
-                                VStack(alignment: .leading, spacing: 10) {
-                                    ForEach(record.exercises, id: \.id) { ex in
-                                        HStack(alignment: .center) {
-                                            VStack(alignment: .leading, spacing: 4) {
-                                                Text(ex.name)
-                                                    .foregroundColor(.white)
-                                                    .fontWeight(.semibold)
-                                                Text("\(ex.sets) sets · \(ex.reps) reps")
-                                                    .foregroundColor(.white.opacity(0.75))
-                                                    .font(.subheadline)
-                                            }
-                                            Spacer()
-                                        }
-                                        .padding(.vertical, 10)
-                                        .padding(.horizontal, 12)
-                                        .glassCard(cornerRadius: 16, padding: 0)
-                                    }
-                                }
-                                .padding(.horizontal, 16)
+                                ReadOnlyExercisesList(exercises: record.exercises)
                             }
                         }
                     }
