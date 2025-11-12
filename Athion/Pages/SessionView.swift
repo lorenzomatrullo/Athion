@@ -6,6 +6,7 @@ struct SessionView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \WorkoutSessionRecord.date, order: .reverse) private var sessionRecords: [WorkoutSessionRecord]
     @State private var showingAddSession = false
+    @State private var viewingRecord: WorkoutSessionRecord?
     
     init() {
         // Configure navigation bar appearance for dark theme
@@ -54,7 +55,7 @@ struct SessionView: View {
                                 WorkoutSessionCard(
                                     session: session,
                                     onTap: {
-                                        // tap handling could navigate to details in future
+                                        viewingRecord = record
                                     },
                                     onDelete: {
                                         modelContext.delete(record)
@@ -98,6 +99,10 @@ struct SessionView: View {
             .navigationDestination(isPresented: $showingAddSession) {
                 // Render from SwiftData via @Query, no need to mutate local state here.
                 AddSessionFlowView { _ in }
+                    .preferredColorScheme(.dark)
+            }
+            .navigationDestination(item: $viewingRecord) { rec in
+                SessionOverviewView(record: rec)
                     .preferredColorScheme(.dark)
             }
         }
