@@ -83,8 +83,8 @@ struct SessionOverviewView: View {
                             }
                             .padding(.horizontal, 16)
                         } else {
-                            if !record.exercises.isEmpty {
-                                ReadOnlyExercisesList(exercises: record.exercises)
+                            if !(record.exercises ?? []).isEmpty {
+                                ReadOnlyExercisesList(exercises: record.exercises ?? [])
                             }
                         }
                     }
@@ -92,6 +92,11 @@ struct SessionOverviewView: View {
                 .padding(.top, 16)
                 .padding(.bottom, 24)
             }
+            // Dismiss keyboard on background tap/drag to avoid remote input warnings
+            .onTapGesture { dismissKeyboard() }
+            .simultaneousGesture(
+                DragGesture().onChanged { _ in dismissKeyboard() }
+            )
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -148,7 +153,7 @@ struct SessionOverviewView: View {
     private func enterEditMode() {
         dismissKeyboard()
         sessionName = record.name
-        exercises = record.exercises.map { Exercise(id: $0.id, name: $0.name, sets: $0.sets, reps: $0.reps) }
+        exercises = (record.exercises ?? []).map { Exercise(id: $0.id, name: $0.name, sets: $0.sets, reps: $0.reps) }
         withAnimation(.easeInOut(duration: 0.2)) {
             isEditing = true
         }
@@ -174,8 +179,9 @@ struct SessionOverviewView: View {
         
         // Early exit if nothing actually changed
         let noNameChange = record.name == trimmed
-        let sameCount = record.exercises.count == exercises.count
-        let sameContent = sameCount && zip(record.exercises, exercises).allSatisfy { rec, ex in
+        let original = record.exercises ?? []
+        let sameCount = original.count == exercises.count
+        let sameContent = sameCount && zip(original, exercises).allSatisfy { rec, ex in
             rec.name == ex.name && rec.sets == ex.sets && rec.reps == ex.reps
         }
         if noNameChange && sameContent {
@@ -187,15 +193,18 @@ struct SessionOverviewView: View {
         record.name = trimmed
         
         // Replace exercise records safely. Do NOT reuse ids to avoid SwiftData collisions.
-        let toRemove = Array(record.exercises)
-        for rec in toRemove {
-            modelContext.delete(rec)
+        let toRemove = Array(record.exercises ?? [])
+        if !toRemove.isEmpty {
+            for rec in toRemove {
+                modelContext.delete(rec)
+            }
         }
-        record.exercises.removeAll(keepingCapacity: false)
+        record.exercises = []
         
         for ex in exercises {
             let exRec = ExerciseRecord(name: ex.name, sets: ex.sets, reps: ex.reps, session: record)
-            record.exercises.append(exRec)
+            if record.exercises == nil { record.exercises = [] }
+            record.exercises?.append(exRec)
         }
         
         try? modelContext.save()

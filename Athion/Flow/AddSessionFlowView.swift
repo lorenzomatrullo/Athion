@@ -99,6 +99,11 @@ struct AddSessionFlowView: View {
                     .padding(.top, 16)
                     .padding(.bottom, 24)
                 }
+                // Dismiss keyboard on background tap/drag to avoid remote input warnings
+                .onTapGesture { dismissKeyboard() }
+                .simultaneousGesture(
+                    DragGesture().onChanged { _ in dismissKeyboard() }
+                )
             }
             .navigationTitle("New Session")
             .navigationBarTitleDisplayMode(.inline)
@@ -136,14 +141,15 @@ struct AddSessionFlowView: View {
         let record = WorkoutSessionRecord(name: sessionName.trimmingCharacters(in: .whitespacesAndNewlines), date: Date())
         for ex in exercises {
             let exRec = ExerciseRecord(name: ex.name, sets: ex.sets, reps: ex.reps, session: record)
-            record.exercises.append(exRec)
+            if record.exercises == nil { record.exercises = [] }
+            record.exercises?.append(exRec)
         }
         modelContext.insert(record)
         try? modelContext.save()
         
         let newSession = WorkoutSession(
             name: record.name,
-            exerciseCount: record.exercises.count,
+            exerciseCount: (record.exercises ?? []).count,
             date: record.date,
             status: .template
         )

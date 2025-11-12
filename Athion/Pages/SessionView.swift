@@ -48,7 +48,7 @@ struct SessionView: View {
                                 let session = WorkoutSession(
                                     id: record.id,
                                     name: record.name,
-                                    exerciseCount: record.exercises.count,
+                                    exerciseCount: (record.exercises ?? []).count,
                                     date: record.date,
                                     status: .template
                                 )

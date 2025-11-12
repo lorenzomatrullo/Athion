@@ -28,14 +28,15 @@ struct ReadOnlyExercisesList: View {
 }
 
 #Preview {
-    let record = WorkoutSessionRecord(name: "Preview", date: Date())
-    record.exercises = [
-        ExerciseRecord(name: "Bench Press", sets: 4, reps: "8-10", session: record),
-        ExerciseRecord(name: "Incline DB Press", sets: 3, reps: "10-12", session: record)
+    let record: WorkoutSessionRecord = WorkoutSessionRecord(name: "Preview", date: Date())
+    let previewExercises: [ExerciseRecord] = [
+        ExerciseRecord(id: UUID(), name: "Bench Press", sets: 4, reps: "8-10", session: record),
+        ExerciseRecord(id: UUID(), name: "Incline DB Press", sets: 3, reps: "10-12", session: record)
     ]
+    record.exercises = previewExercises
     return ZStack {
         CustomBackgroundView()
-        ReadOnlyExercisesList(exercises: record.exercises)
+        ReadOnlyExercisesList(exercises: previewExercises)
             .padding(.top, 24)
     }
     .preferredColorScheme(.dark)

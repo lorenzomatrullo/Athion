@@ -3,10 +3,10 @@ import SwiftData
 
 @Model
 final class WorkoutSessionRecord {
-    @Attribute(.unique) var id: UUID
-    var name: String
-    var date: Date
-    @Relationship(deleteRule: .cascade, inverse: \ExerciseRecord.session) var exercises: [ExerciseRecord] = []
+    var id: UUID = UUID()
+    var name: String = ""
+    var date: Date = Date()
+    @Relationship(deleteRule: .cascade, inverse: \ExerciseRecord.session) var exercises: [ExerciseRecord]?
     
     init(id: UUID = UUID(), name: String, date: Date = Date()) {
         self.id = id
@@ -17,10 +17,10 @@ final class WorkoutSessionRecord {
 
 @Model
 final class ExerciseRecord {
-    @Attribute(.unique) var id: UUID
-    var name: String
-    var sets: Int
-    var reps: String
+    var id: UUID = UUID()
+    var name: String = ""
+    var sets: Int = 0
+    var reps: String = ""
     
     var session: WorkoutSessionRecord?
     
