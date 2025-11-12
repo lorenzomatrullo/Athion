@@ -137,27 +137,50 @@ struct SessionOverviewView: View {
                 .padding(.bottom, 24)
             }
         }
-        .navigationTitle(isEditing ? "Session Edit" : "Session Overview")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem(placement: .principal) {
+                Text(isEditing ? "Session Edit" : "Session")
+                    .font(.headline)
+                    .foregroundColor(.white)
+            }
+            ToolbarItemGroup(placement: .topBarTrailing) {
                 if isEditing {
                     Button(action: saveEdits) {
                         Image(systemName: "checkmark")
+                            .font(.system(size: 18, weight: .semibold))
+                            .frame(width: 28, height: 28)
                     }
                     .disabled(!canSaveSession)
                     .opacity(canSaveSession ? 1.0 : 0.5)
                     .foregroundColor(.white.opacity(0.9))
                 } else {
-                    Button {
-                        enterEditMode()
-                    } label: {
-                        Image(systemName: "square.and.pencil")
+                    HStack(spacing: 18) {
+                        Button {
+                            enterEditMode()
+                        } label: {
+                            Image(systemName: "square.and.pencil")
+                                .font(.system(size: 18, weight: .semibold))
+                                .frame(width: 28, height: 28)
+                                .offset(y: -1)
+                        }
+                        .foregroundColor(.white.opacity(0.9))
+                        
+                        // Start button (hook up backend later)
+                        Button {
+                            // TODO: start session action
+                        } label: {
+                            Image(systemName: "play.circle.fill")
+                                .font(.system(size: 18, weight: .semibold))
+                                .frame(width: 28, height: 28)
+                        }
+                        .foregroundColor(.white.opacity(0.9))
                     }
-                    .foregroundColor(.white.opacity(0.9))
                 }
             }
         }
+        // Animate toolbar expansion/collapse when toggling edit mode
+        .animation(.easeInOut(duration: 0.2), value: isEditing)
         .onAppear {
             // Ensure we reset edit buffer if needed
             if !isEditing {
@@ -170,7 +193,9 @@ struct SessionOverviewView: View {
         dismissKeyboard()
         sessionName = record.name
         exercises = record.exercises.map { Exercise(id: $0.id, name: $0.name, sets: $0.sets, reps: $0.reps) }
-        isEditing = true
+        withAnimation(.easeInOut(duration: 0.2)) {
+            isEditing = true
+        }
     }
     
     private func saveExercise() {
@@ -218,7 +243,9 @@ struct SessionOverviewView: View {
         }
         
         try? modelContext.save()
-        isEditing = false
+        withAnimation(.easeInOut(duration: 0.2)) {
+            isEditing = false
+        }
     }
 }
 
@@ -230,6 +257,8 @@ struct SessionOverviewView: View {
         ExerciseRecord(name: "Incline DB Press", sets: 3, reps: "10-12", session: record)
     ]
     
-    return SessionOverviewView(record: record)
-        .preferredColorScheme(.dark)
+    return NavigationStack {
+        SessionOverviewView(record: record)
+    }
+    .preferredColorScheme(.dark)
 }
