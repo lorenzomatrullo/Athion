@@ -16,10 +16,6 @@ struct AddSessionFlowView: View {
     @State private var exReps: String = ""
     @State private var isAddingExercise: Bool = false
     
-    // Deletion confirmation
-    @State private var exercisePendingDeletion: Exercise?
-    @State private var showingDeleteAlert: Bool = false
-    
     private var exSets: Int { Int(exSetsText) ?? 0 }
     
     private var canSaveExercise: Bool {
@@ -61,31 +57,12 @@ struct AddSessionFlowView: View {
                         
                         // Exercises overview (shown ABOVE add button)
                         if !exercises.isEmpty {
-                            VStack(alignment: .leading, spacing: 10) {
-                                ForEach(exercises) { ex in
-                                    HStack(alignment: .center) {
-                                        VStack(alignment: .leading, spacing: 4) {
-                                            Text(ex.name)
-                                                .foregroundColor(.white)
-                                                .fontWeight(.semibold)
-                                            Text("\(ex.sets) sets · \(ex.reps) reps")
-                                                .foregroundColor(.white.opacity(0.75))
-                                                .font(.subheadline)
-                                        }
-                                        Spacer()
-                                        Button(role: .destructive) {
-                                            exercisePendingDeletion = ex
-                                            showingDeleteAlert = true
-                                        } label: {
-                                            Image(systemName: "trash")
-                                                .foregroundColor(.white.opacity(0.8))
-                                        }
-                                    }
-                                    .padding(.vertical, 10)
-                                    .padding(.horizontal, 12)
-                                    .glassCard(cornerRadius: 16, padding: 0)
+                            ExercisesList(
+                                exercises: $exercises,
+                                onDelete: { ex in
+                                    if let idx = exercises.firstIndex(of: ex) { exercises.remove(at: idx) }
                                 }
-                            }
+                            )
                             .padding(.horizontal, 16)
                         }
                         
@@ -96,7 +73,13 @@ struct AddSessionFlowView: View {
                         }
                         
                         // Add Exercise button
-                        Button(action: { withAnimation { isAddingExercise = true } }) {
+                        Button(action: {
+                            // Start a fresh add; clear fields and reset editing state
+                            exName = ""
+                            exSetsText = ""
+                            exReps = ""
+                            withAnimation { isAddingExercise = true }
+                        }) {
                             HStack(spacing: 10) {
                                 Image(systemName: "plus.circle.fill")
                                     .font(.system(size: 18, weight: .semibold))
@@ -131,24 +114,15 @@ struct AddSessionFlowView: View {
         }
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
-        .alert("Delete Exercise", isPresented: $showingDeleteAlert, presenting: exercisePendingDeletion) { ex in
-            Button("Cancel", role: .cancel) {}
-            Button("Delete", role: .destructive) {
-                if let idx = exercises.firstIndex(of: ex) {
-                    exercises.remove(at: idx)
-                }
-            }
-        } message: { ex in
-            Text("Are you sure you want to delete \(ex.name)?")
-        }
     }
     
     private func saveExercise() {
         guard canSaveExercise else { return }
-        let ex = Exercise(name: exName.trimmingCharacters(in: .whitespacesAndNewlines),
-                          sets: exSets,
-                          reps: exReps.trimmingCharacters(in: .whitespacesAndNewlines))
-        exercises.insert(ex, at: 0)
+        let trimmedName = exName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedReps = exReps.trimmingCharacters(in: .whitespacesAndNewlines)
+        // Insert new exercise (editing handled inside ExercisesList)
+        let ex = Exercise(name: trimmedName, sets: exSets, reps: trimmedReps)
+        exercises.append(ex)
         exName = ""
         exSetsText = ""
         exReps = ""

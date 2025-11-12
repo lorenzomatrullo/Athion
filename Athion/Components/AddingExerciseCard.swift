@@ -6,9 +6,10 @@ struct AddingExerciseCard: View {
     @Binding var reps: String
     var onSave: () -> Void
     var canSave: Bool
+    var embedded: Bool = false
     
     var body: some View {
-        VStack(spacing: 0) {
+        let content = VStack(spacing: 0) {
             TextField("Exercise Name", text: $name)
                 .textInputAutocapitalization(.words)
                 .foregroundColor(.white)
@@ -53,7 +54,13 @@ struct AddingExerciseCard: View {
             .opacity(canSave ? 1.0 : 0.5)
             .padding(.bottom, -2)
         }
-        .glassCard(cornerRadius: 18, padding: 16)
+        
+        if embedded {
+            content
+        } else {
+            content
+                .glassCard(cornerRadius: 18, padding: 16)
+        }
     }
 }
 
