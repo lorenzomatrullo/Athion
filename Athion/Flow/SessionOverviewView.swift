@@ -2,6 +2,7 @@ import SwiftUI
 import SwiftData
 
 struct SessionOverviewView: View {
+    @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     
     let record: WorkoutSessionRecord
@@ -15,6 +16,7 @@ struct SessionOverviewView: View {
     @State private var exSetsText: String = ""
     @State private var exReps: String = ""
     @State private var isAddingExercise: Bool = false
+    @State private var showingActiveWorkout: Bool = false
     
     private var exSets: Int { Int(exSetsText) ?? 0 }
     private var canSaveExercise: Bool {
@@ -127,9 +129,9 @@ struct SessionOverviewView: View {
                         }
                         .foregroundColor(.white.opacity(0.9))
                         
-                        // Start button (hook up backend later)
+                        // Start button
                         Button {
-                            // TODO: start session action
+                            showingActiveWorkout = true
                         } label: {
                             Image(systemName: "play.circle.fill")
                                 .font(.system(size: 18, weight: .semibold))
@@ -142,6 +144,12 @@ struct SessionOverviewView: View {
         }
         // Animate toolbar expansion/collapse when toggling edit mode
         .animation(.easeInOut(duration: 0.2), value: isEditing)
+        .fullScreenCover(isPresented: $showingActiveWorkout) {
+            ActiveWorkoutView(record: record, onFinish: {
+                dismiss()
+            })
+            .preferredColorScheme(.dark)
+        }
         .onAppear {
             // Ensure we reset edit buffer if needed
             if !isEditing {
@@ -179,9 +187,9 @@ struct SessionOverviewView: View {
         
         // Early exit if nothing actually changed
         let noNameChange = record.name == trimmed
-        let original = record.exercises ?? []
-        let sameCount = original.count == exercises.count
-        let sameContent = sameCount && zip(original, exercises).allSatisfy { rec, ex in
+        let originalRecords = record.exercises ?? []
+        let sameCount = originalRecords.count == exercises.count
+        let sameContent = sameCount && zip(originalRecords, exercises).allSatisfy { rec, ex in
             rec.name == ex.name && rec.sets == ex.sets && rec.reps == ex.reps
         }
         if noNameChange && sameContent {
@@ -189,23 +197,34 @@ struct SessionOverviewView: View {
             return
         }
         
-        // Persist edits
+        // Persist edits (preserve order; update in place when possible)
         record.name = trimmed
+        var idToRecord: [UUID: ExerciseRecord] = [:]
+        for rec in originalRecords { idToRecord[rec.id] = rec }
         
-        // Replace exercise records safely. Do NOT reuse ids to avoid SwiftData collisions.
-        let toRemove = Array(record.exercises ?? [])
-        if !toRemove.isEmpty {
-            for rec in toRemove {
-                modelContext.delete(rec)
-            }
-        }
-        record.exercises = []
+        var nextList: [ExerciseRecord] = []
+        var usedIds = Set<UUID>()
         
         for ex in exercises {
-            let exRec = ExerciseRecord(name: ex.name, sets: ex.sets, reps: ex.reps, session: record)
-            if record.exercises == nil { record.exercises = [] }
-            record.exercises?.append(exRec)
+            if let existing = idToRecord[ex.id] {
+                existing.name = ex.name
+                existing.sets = ex.sets
+                existing.reps = ex.reps
+                nextList.append(existing)
+                usedIds.insert(existing.id)
+            } else {
+                // New exercise added during edit
+                let rec = ExerciseRecord(id: ex.id, name: ex.name, sets: ex.sets, reps: ex.reps, session: record)
+                nextList.append(rec)
+            }
         }
+        
+        // Remove records that were deleted in the edit list
+        for rec in originalRecords where !usedIds.contains(rec.id) {
+            modelContext.delete(rec)
+        }
+        
+        record.exercises = nextList
         
         try? modelContext.save()
         withAnimation(.easeInOut(duration: 0.2)) {
