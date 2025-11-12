@@ -75,6 +75,7 @@ struct AddSessionFlowView: View {
                         // Add Exercise button
                         Button(action: {
                             // Start a fresh add; clear fields and reset editing state
+                            dismissKeyboard()
                             exName = ""
                             exSetsText = ""
                             exReps = ""
@@ -118,6 +119,7 @@ struct AddSessionFlowView: View {
     
     private func saveExercise() {
         guard canSaveExercise else { return }
+        dismissKeyboard()
         let trimmedName = exName.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedReps = exReps.trimmingCharacters(in: .whitespacesAndNewlines)
         // Insert new exercise (editing handled inside ExercisesList)
