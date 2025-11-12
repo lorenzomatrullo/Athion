@@ -27,11 +27,7 @@ struct AppPreview: View {
             
             ProfileView()
                 .tabItem {
-                    Label {
-                        Text("Profile")
-                    } icon: {
-                        Image(systemName: isSignedIn ? "person" : "person.badge.shield.exclamationmark")
-                    }
+                    Label("Profile", systemImage: isSignedIn ? "person.fill" : "person.badge.shield.exclamationmark.fill")
                 }
         }
         .accentColor(.white)

@@ -3,6 +3,7 @@ import AuthenticationServices
 
 struct ProfileView: View {
     @AppStorage("isSignedIn") private var isSignedIn: Bool = false
+    @AppStorage("displayName") private var displayName: String = ""
     @Environment(\.openURL) private var openURL
     
     init() {
@@ -40,16 +41,33 @@ struct ProfileView: View {
                                     .font(.subheadline)
                                     .foregroundColor(.white.opacity(0.7))
                                 
-                                SignInWithAppleButton(.signIn) { _ in
-                                    // configure later
-                                } onCompletion: { _ in
-                                    // handle later
+                                SignInWithAppleButton(.signIn) { request in
+                                    request.requestedScopes = [.fullName]
+                                } onCompletion: { result in
+                                    switch result {
+                                    case .success(let auth):
+                                        if let cred = auth.credential as? ASAuthorizationAppleIDCredential {
+                                            let name = [cred.fullName?.givenName, cred.fullName?.familyName]
+                                                .compactMap { $0 }
+                                                .joined(separator: " ")
+                                            if !name.isEmpty { displayName = name }
+                                        }
+                                        withAnimation(.spring()) {
+                                            isSignedIn = true
+                                        }
+                                    case .failure:
+                                        break
+                                    }
                                 }
                                 .signInWithAppleButtonStyle(.white)
                                 .frame(height: 50)
                                 .cornerRadius(25)
                             }
                             .glassCard(cornerRadius: 20, padding: 16)
+                            .padding(.horizontal, 16)
+                        } else {
+                            // Logged-in card
+                            LoggedInProfileCard(displayName: displayName)
                             .padding(.horizontal, 16)
                         }
                         

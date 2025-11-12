@@ -4,6 +4,7 @@ import AuthenticationServices
 struct OnboardingView: View {
     var onContinue: () -> Void = {}
     @State private var showSkipConfirm: Bool = false
+    @AppStorage("isSignedIn") private var isSignedIn: Bool = false
     
     var body: some View {
         NavigationStack {
@@ -66,10 +67,17 @@ struct OnboardingView: View {
                         
                         // Native Sign in with Apple button (styled)
                         SignInWithAppleButton(.signIn) { request in
-                            // configure request; we’ll wire this up later
                             request.requestedScopes = []
-                        } onCompletion: { _ in
-                            // handled later; for now do nothing
+                        } onCompletion: { result in
+                            switch result {
+                            case .success:
+                                Task { @MainActor in
+                                    isSignedIn = true
+                                    onContinue()
+                                }
+                            case .failure:
+                                break
+                            }
                         }
                         .signInWithAppleButtonStyle(.white)
                         .frame(height: 50)
@@ -89,7 +97,7 @@ struct OnboardingView: View {
                         isPresented: $showSkipConfirm,
                         titleVisibility: .visible
                     ) {
-                        Button("Continue") { onContinue() }
+                        Button("Continue") { isSignedIn = false; onContinue() }
                         Button("Cancel", role: .cancel) { }
                     } message: {
                         Text("Your data will be stored only on this device and won’t sync across devices. You can sign in later from the profile tab.")
