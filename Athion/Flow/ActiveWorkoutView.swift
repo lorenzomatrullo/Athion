@@ -175,12 +175,6 @@ struct ActiveWorkoutView: View {
         }
     }
     
-    private func extractFirstNumber(from text: String) -> String? {
-        let digits = text.compactMap { $0.isNumber ? String($0) : " " }.joined()
-        let first = digits.split(separator: " ").first.map(String.init)
-        return first
-    }
-    
     private func bindingForSet(exerciseId: UUID, setId: UUID, keyPath: WritableKeyPath<SetEntry, String>) -> Binding<String> {
         Binding<String>(
             get: {

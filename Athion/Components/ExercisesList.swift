@@ -1,8 +1,10 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct ExercisesList: View {
     @Binding var exercises: [Exercise]
     var onDelete: (Exercise) -> Void
+    var enableReorder: Bool = false
     
     // Inline edit state
     @State private var editingIndex: Int? = nil
@@ -10,6 +12,7 @@ struct ExercisesList: View {
     @State private var setsTextDraft: String = ""
     @State private var repsDraft: String = ""
     @State private var showingDeleteAlertForIndex: Int? = nil
+    @State private var draggedItem: Exercise?
     
     private var setsDraft: Int { Int(setsTextDraft) ?? 0 }
     
@@ -58,6 +61,16 @@ struct ExercisesList: View {
                     .onTapGesture {
                         beginEditing(exerciseAt: index)
                     }
+                    .onDrag {
+                        guard enableReorder else { return NSItemProvider() }
+                        draggedItem = ex
+                        return NSItemProvider(object: ex.id.uuidString as NSString)
+                    }
+                    .onDrop(of: [UTType.text], delegate: ReorderDropDelegate(
+                        current: ex,
+                        items: $exercises,
+                        draggedItem: $draggedItem
+                    ))
                     .alert("Delete Exercise", isPresented: Binding<Bool>(
                         get: { showingDeleteAlertForIndex == index },
                         set: { newValue in if !newValue { showingDeleteAlertForIndex = nil } }
@@ -93,6 +106,36 @@ struct ExercisesList: View {
     }
 }
 
+// MARK: - Reorder Support
+
+private struct ReorderDropDelegate: DropDelegate {
+    let current: Exercise
+    @Binding var items: [Exercise]
+    @Binding var draggedItem: Exercise?
+    
+    func validateDrop(info: DropInfo) -> Bool {
+        return true
+    }
+    
+    func dropEntered(info: DropInfo) {
+        guard let dragged = draggedItem,
+              dragged != current,
+              let from = items.firstIndex(of: dragged),
+              let to = items.firstIndex(of: current) else { return }
+        if items[to].id != dragged.id {
+            withAnimation(.easeInOut(duration: 0.15)) {
+                let item = items.remove(at: from)
+                items.insert(item, at: to)
+            }
+        }
+    }
+    
+    func performDrop(info: DropInfo) -> Bool {
+        draggedItem = nil
+        return true
+    }
+}
+
 #Preview {
     ZStack {
         CustomBackgroundView()
@@ -102,7 +145,7 @@ struct ExercisesList: View {
         ]) { $items in
             ExercisesList(exercises: $items, onDelete: { ex in
                 if let idx = items.firstIndex(of: ex) { items.remove(at: idx) }
-            })
+            }, enableReorder: true)
             .padding(.horizontal, 16)
         }
     }

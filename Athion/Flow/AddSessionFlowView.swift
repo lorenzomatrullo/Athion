@@ -64,7 +64,8 @@ struct AddSessionFlowView: View {
                                 exercises: $exercises,
                                 onDelete: { ex in
                                     if let idx = exercises.firstIndex(of: ex) { exercises.remove(at: idx) }
-                                }
+                                },
+                                enableReorder: true
                             )
                             .padding(.horizontal, 16)
                         }
