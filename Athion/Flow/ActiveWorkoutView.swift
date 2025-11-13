@@ -6,6 +6,7 @@ struct ActiveWorkoutView: View {
     var onFinish: (() -> Void)? = nil
     
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
     
     struct SetEntry: Identifiable, Hashable {
         let id = UUID()
@@ -23,6 +24,12 @@ struct ActiveWorkoutView: View {
     
     @State private var exercises: [ExerciseEntry] = []
     @State private var showingFinishConfirm: Bool = false
+    
+    private struct Previous: Equatable {
+        let weight: String
+        let reps: String
+    }
+    @State private var prevByExerciseAndSet: [String: [Int: Previous]] = [:]
     
     var body: some View {
         NavigationStack {
@@ -73,7 +80,8 @@ struct ActiveWorkoutView: View {
                                         
                                         // Weight field (kg)
                                         HStack {
-                                            TextField("0", text: bindingForSet(exerciseId: ex.id, setId: set.id, keyPath: \.weightKg))
+                                            let wPrompt = prevByExerciseAndSet[ex.name]?[idx]?.weight ?? "0"
+                                            TextField("", text: bindingForSet(exerciseId: ex.id, setId: set.id, keyPath: \.weightKg), prompt: Text(wPrompt))
                                                 .keyboardType(.decimalPad)
                                                 .foregroundColor(.white)
                                             Text("kg")
@@ -85,7 +93,8 @@ struct ActiveWorkoutView: View {
                                         
                                         // Reps field
                                         HStack {
-                                            TextField("0", text: bindingForSet(exerciseId: ex.id, setId: set.id, keyPath: \.reps))
+                                            let rPrompt = prevByExerciseAndSet[ex.name]?[idx]?.reps ?? "0"
+                                            TextField("", text: bindingForSet(exerciseId: ex.id, setId: set.id, keyPath: \.reps), prompt: Text(rPrompt))
                                                 .keyboardType(.numberPad)
                                                 .foregroundColor(.white)
                                             Text("reps")
@@ -143,6 +152,7 @@ struct ActiveWorkoutView: View {
                         }
                         .confirmationDialog("Finish workout?", isPresented: $showingFinishConfirm, titleVisibility: .visible) {
                             Button("Finish", role: .destructive) {
+                                saveLogs()
                                 onFinish?()
                                 dismiss()
                             }
@@ -161,7 +171,10 @@ struct ActiveWorkoutView: View {
             .navigationBarTitleDisplayMode(.inline)
             .keyboardDismissToolbar()
         }
-        .onAppear(perform: bootstrap)
+        .onAppear {
+            bootstrap()
+            loadPrevious()
+        }
     }
     
     private func bootstrap() {
@@ -173,6 +186,32 @@ struct ActiveWorkoutView: View {
             let sets = Array(0..<setCount).map { _ in SetEntry(weightKg: "", reps: "", isCompleted: false) }
             return ExerciseEntry(name: ex.name, repsRange: ex.reps, sets: sets)
         }
+    }
+    
+    private func loadPrevious() {
+        var lookup: [String: [Int: Previous]] = [:]
+        for ex in exercises {
+            for (idx, _) in ex.sets.enumerated() {
+                if let prev = fetchLastLog(exerciseName: ex.name, setIndex: idx) {
+                    if lookup[ex.name] == nil { lookup[ex.name] = [:] }
+                    lookup[ex.name]?[idx] = prev
+                }
+            }
+        }
+        prevByExerciseAndSet = lookup
+    }
+    
+    private func fetchLastLog(exerciseName: String, setIndex: Int) -> Previous? {
+        let descriptor = FetchDescriptor<ExerciseSetLog>(
+            predicate: #Predicate { $0.exerciseName == exerciseName && $0.setIndex == setIndex },
+            sortBy: [SortDescriptor(\.date, order: .reverse)]
+        )
+        if let item = try? modelContext.fetch(descriptor).first {
+            let w = item.weightKg == 0 ? "-" : String(Int(item.weightKg))
+            let r = item.reps == 0 ? "-" : String(item.reps)
+            return Previous(weight: w, reps: r)
+        }
+        return nil
     }
     
     private func bindingForSet(exerciseId: UUID, setId: UUID, keyPath: WritableKeyPath<SetEntry, String>) -> Binding<String> {
@@ -196,6 +235,18 @@ struct ActiveWorkoutView: View {
         // If already completed, do nothing (cannot undo)
         if exercises[exIndex].sets[setIndex].isCompleted { return }
         exercises[exIndex].sets[setIndex].isCompleted = true
+    }
+    
+    private func saveLogs() {
+        for ex in exercises {
+            for (idx, set) in ex.sets.enumerated() where set.isCompleted {
+                let weight = Double(set.weightKg) ?? 0
+                let reps = Int(set.reps) ?? 0
+                let log = ExerciseSetLog(sessionId: record.id, exerciseName: ex.name, setIndex: idx, weightKg: weight, reps: reps)
+                modelContext.insert(log)
+            }
+        }
+        try? modelContext.save()
     }
 }
 

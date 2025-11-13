@@ -58,6 +58,20 @@ struct SessionView: View {
                                         viewingRecord = record
                                     },
                                     onDelete: {
+                                        // Delete the session and its associated logs
+                                        // First remove ExerciseSetLog entries linked to this session
+                                        let sessionId = record.id
+                                        let descriptor = FetchDescriptor<ExerciseSetLog>(
+                                            predicate: #Predicate<ExerciseSetLog> { log in
+                                                log.sessionId == sessionId
+                                            }
+                                        )
+                                        if let logs = try? modelContext.fetch(descriptor) {
+                                            for log in logs {
+                                                modelContext.delete(log)
+                                            }
+                                        }
+                                        // Then delete the session
                                         modelContext.delete(record)
                                         try? modelContext.save()
                                     }
