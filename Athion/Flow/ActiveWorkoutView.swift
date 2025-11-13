@@ -11,6 +11,7 @@ struct ActiveWorkoutView: View {
         let id = UUID()
         var weightKg: String
         var reps: String
+        var isCompleted: Bool = false
     }
     
     struct ExerciseEntry: Identifiable {
@@ -53,6 +54,12 @@ struct ActiveWorkoutView: View {
                                 
                                 ForEach(Array(ex.sets.enumerated()), id: \.element.id) { idx, set in
                                     HStack(spacing: 12) {
+                                        // Completion gate: both weight and reps must be provided and set not already completed
+                                        let isFilled = !set.weightKg.trimmingCharacters(in: .whitespaces).isEmpty
+                                        && !set.reps.trimmingCharacters(in: .whitespaces).isEmpty
+                                        let canComplete = isFilled && !set.isCompleted
+                                        let showDisabledLook = !isFilled && !set.isCompleted
+                                        
                                         // Set number bullet
                                         ZStack {
                                             Circle()
@@ -89,11 +96,19 @@ struct ActiveWorkoutView: View {
                                         .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 12))
                                         
                                         // Done button (UI only; match set-number circle style and size)
-                                        Button(action: {}) {
+                                        Button(action: {
+                                            if canComplete {
+                                                completeSet(exerciseId: ex.id, setId: set.id)
+                                            }
+                                        }) {
                                             ZStack {
                                                 Circle()
-                                                    .strokeBorder(Color.white.opacity(0.25), lineWidth: 1)
-                                                    .background(Circle().fill(Color.white.opacity(0.08)))
+                                                    .strokeBorder(set.isCompleted ? Color.green : Color.white.opacity(0.25), lineWidth: 1)
+                                                    .background(
+                                                        Circle().fill(
+                                                            set.isCompleted ? Color.green.opacity(0.35) : Color.white.opacity(0.08)
+                                                        )
+                                                    )
                                                 Image(systemName: "checkmark")
                                                     .font(.system(size: 16, weight: .bold))
                                                     .foregroundColor(.white)
@@ -102,6 +117,9 @@ struct ActiveWorkoutView: View {
                                         }
                                         .padding(.leading, 8) // tighter gap next to reps field
                                         .buttonStyle(.plain)
+                                        // Default state (not filled) uses disabled look; completed green keeps full look but is not tappable
+                                        .disabled(showDisabledLook)
+                                        .allowsHitTesting(canComplete) // ignore taps unless we can complete
                                     }
                                 }
                             }
@@ -152,7 +170,7 @@ struct ActiveWorkoutView: View {
         exercises = source.map { ex in
             let setCount = max(1, ex.sets)
             // Start reps empty so the user can input completed reps, while the header shows the planned range.
-            let sets = Array(0..<setCount).map { _ in SetEntry(weightKg: "", reps: "") }
+            let sets = Array(0..<setCount).map { _ in SetEntry(weightKg: "", reps: "", isCompleted: false) }
             return ExerciseEntry(name: ex.name, repsRange: ex.reps, sets: sets)
         }
     }
@@ -176,6 +194,14 @@ struct ActiveWorkoutView: View {
                 exercises[exIndex].sets[setIndex][keyPath: keyPath] = newValue
             }
         )
+    }
+    
+    private func completeSet(exerciseId: UUID, setId: UUID) {
+        guard let exIndex = exercises.firstIndex(where: { $0.id == exerciseId }),
+              let setIndex = exercises[exIndex].sets.firstIndex(where: { $0.id == setId }) else { return }
+        // If already completed, do nothing (cannot undo)
+        if exercises[exIndex].sets[setIndex].isCompleted { return }
+        exercises[exIndex].sets[setIndex].isCompleted = true
     }
 }
 
