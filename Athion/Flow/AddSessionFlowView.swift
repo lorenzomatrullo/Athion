@@ -9,6 +9,7 @@ struct AddSessionFlowView: View {
     
     @State private var sessionName: String = ""
     @State private var exercises: [Exercise] = []
+    @FocusState private var isSessionNameFocused: Bool
     
     // Inline exercise fields
     @State private var exName: String = ""
@@ -43,6 +44,8 @@ struct AddSessionFlowView: View {
                             TextField("e.g., Push Day", text: $sessionName)
                                 .textInputAutocapitalization(.words)
                                 .foregroundColor(.white)
+                                .focused($isSessionNameFocused)
+                                .submitLabel(.done)
                                 .padding(.vertical, 10)
                                 .padding(.horizontal, 12)
                                 .glassCard(cornerRadius: 18, padding: 0)
@@ -118,8 +121,10 @@ struct AddSessionFlowView: View {
                 }
             }
         }
+        .onAppear { DispatchQueue.main.async { isSessionNameFocused = true } }
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
+        .keyboardDismissToolbar()
     }
     
     private func saveExercise() {

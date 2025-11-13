@@ -8,11 +8,19 @@ struct AddingExerciseCard: View {
     var canSave: Bool
     var embedded: Bool = false
     
+    @FocusState private var focusedField: Field?
+    private enum Field {
+        case name, sets, reps
+    }
+    
     var body: some View {
         let content = VStack(spacing: 0) {
             TextField("Exercise Name", text: $name)
                 .textInputAutocapitalization(.words)
                 .foregroundColor(.white)
+                .focused($focusedField, equals: .name)
+                .submitLabel(.next)
+                .onSubmit { focusedField = .sets }
                 .padding(.top, 12)
                 .padding(.bottom, 6)
                 .padding(.horizontal, 12)
@@ -23,6 +31,9 @@ struct AddingExerciseCard: View {
             TextField("Number of Sets", text: $setsText)
                 .keyboardType(.numberPad)
                 .foregroundColor(.white)
+                .focused($focusedField, equals: .sets)
+                .submitLabel(.next)
+                .onSubmit { focusedField = .reps }
                 .padding(.top, 12)
                 .padding(.bottom, 6)
                 .padding(.horizontal, 12)
@@ -32,6 +43,9 @@ struct AddingExerciseCard: View {
             
             TextField("Rep Range", text: $reps)
                 .foregroundColor(.white)
+                .focused($focusedField, equals: .reps)
+                .submitLabel(.done)
+                .onSubmit { if canSave { onSave() } }
                 .padding(.top, 12)
                 .padding(.bottom, 2)
                 .padding(.horizontal, 12)
@@ -57,9 +71,11 @@ struct AddingExerciseCard: View {
         
         if embedded {
             content
+                .onAppear { focusedField = .name }
         } else {
             content
                 .glassCard(cornerRadius: 18, padding: 16)
+                .onAppear { focusedField = .name }
         }
     }
 }
