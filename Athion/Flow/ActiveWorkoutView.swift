@@ -88,7 +88,20 @@ struct ActiveWorkoutView: View {
                                         .padding(.horizontal, 12)
                                         .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 12))
                                         
-                                        Spacer(minLength: 0)
+                                        // Done button (UI only; match set-number circle style and size)
+                                        Button(action: {}) {
+                                            ZStack {
+                                                Circle()
+                                                    .strokeBorder(Color.white.opacity(0.25), lineWidth: 1)
+                                                    .background(Circle().fill(Color.white.opacity(0.08)))
+                                                Image(systemName: "checkmark")
+                                                    .font(.system(size: 16, weight: .bold))
+                                                    .foregroundColor(.white)
+                                            }
+                                            .frame(width: 36, height: 36)
+                                        }
+                                        .padding(.leading, 8) // tighter gap next to reps field
+                                        .buttonStyle(.plain)
                                     }
                                 }
                             }

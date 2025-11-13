@@ -11,6 +11,10 @@ struct AppPreview: View {
         
         UITabBar.appearance().standardAppearance = appearance
         UITabBar.appearance().scrollEdgeAppearance = appearance
+        
+        // Ensure cursor/selection handles for text inputs are white across the app
+        UITextField.appearance().tintColor = .white
+        UITextView.appearance().tintColor = .white
     }
     
     var body: some View {
@@ -31,6 +35,7 @@ struct AppPreview: View {
                 }
         }
         .accentColor(.white)
+        .tint(.white)
         .keyboardDismissToolbar()
     }
 }
