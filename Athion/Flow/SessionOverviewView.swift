@@ -52,7 +52,7 @@ struct SessionOverviewView: View {
                     Group {
                         if isEditing {
                             if !exercises.isEmpty {
-                                ExercisesList(
+                                ReorderableExercisesList(
                                     exercises: $exercises,
                                     onDelete: { ex in
                                         if let idx = exercises.firstIndex(of: ex) { exercises.remove(at: idx) }
@@ -86,7 +86,7 @@ struct SessionOverviewView: View {
                             .padding(.horizontal, 16)
                         } else {
                             if !(record.exercises ?? []).isEmpty {
-                                ReadOnlyExercisesList(exercises: record.exercises ?? [])
+                                ReadOnlyExercisesList(exercises: (record.exercises ?? []).sorted { $0.orderIndex < $1.orderIndex })
                             }
                         }
                     }
@@ -162,7 +162,9 @@ struct SessionOverviewView: View {
     private func enterEditMode() {
         dismissKeyboard()
         sessionName = record.name
-        exercises = (record.exercises ?? []).map { Exercise(id: $0.id, name: $0.name, sets: $0.sets, reps: $0.reps) }
+        exercises = (record.exercises ?? [])
+            .sorted { $0.orderIndex < $1.orderIndex }
+            .map { Exercise(id: $0.id, name: $0.name, sets: $0.sets, reps: $0.reps) }
         withAnimation(.easeInOut(duration: 0.2)) {
             isEditing = true
         }
@@ -206,16 +208,17 @@ struct SessionOverviewView: View {
         var nextList: [ExerciseRecord] = []
         var usedIds = Set<UUID>()
         
-        for ex in exercises {
+        for (index, ex) in exercises.enumerated() {
             if let existing = idToRecord[ex.id] {
                 existing.name = ex.name
                 existing.sets = ex.sets
                 existing.reps = ex.reps
+                existing.orderIndex = index
                 nextList.append(existing)
                 usedIds.insert(existing.id)
             } else {
                 // New exercise added during edit
-                let rec = ExerciseRecord(id: ex.id, name: ex.name, sets: ex.sets, reps: ex.reps, session: record)
+                let rec = ExerciseRecord(id: ex.id, name: ex.name, sets: ex.sets, reps: ex.reps, session: record, orderIndex: index)
                 nextList.append(rec)
             }
         }

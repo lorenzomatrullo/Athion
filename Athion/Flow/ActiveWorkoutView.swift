@@ -134,8 +134,8 @@ struct ActiveWorkoutView: View {
     }
     
     private func bootstrap() {
-        // Build transient entries from the session's exercises
-        let source = record.exercises ?? []
+        // Build transient entries from the session's exercises (sorted by orderIndex)
+        let source = (record.exercises ?? []).sorted { $0.orderIndex < $1.orderIndex }
         exercises = source.map { ex in
             let setCount = max(1, ex.sets)
             // Start reps empty so the user can input completed reps, while the header shows the planned range.

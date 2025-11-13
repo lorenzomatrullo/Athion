@@ -144,8 +144,8 @@ struct AddSessionFlowView: View {
     private func saveSession() {
         guard canSaveSession else { return }
         let record = WorkoutSessionRecord(name: sessionName.trimmingCharacters(in: .whitespacesAndNewlines), date: Date())
-        for ex in exercises {
-            let exRec = ExerciseRecord(name: ex.name, sets: ex.sets, reps: ex.reps, session: record)
+        for (idx, ex) in exercises.enumerated() {
+            let exRec = ExerciseRecord(name: ex.name, sets: ex.sets, reps: ex.reps, session: record, orderIndex: idx)
             if record.exercises == nil { record.exercises = [] }
             record.exercises?.append(exRec)
         }
