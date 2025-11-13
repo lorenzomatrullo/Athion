@@ -31,6 +31,7 @@ struct AppPreview: View {
                 }
         }
         .accentColor(.white)
+        .keyboardDismissToolbar()
     }
 }
 

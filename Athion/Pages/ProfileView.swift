@@ -5,6 +5,7 @@ struct ProfileView: View {
     @AppStorage("isSignedIn") private var isSignedIn: Bool = false
     @AppStorage("displayName") private var displayName: String = ""
     @Environment(\.openURL) private var openURL
+    @State private var showSignOutAlert: Bool = false
     
     init() {
         let appearance = UINavigationBarAppearance()
@@ -68,7 +69,7 @@ struct ProfileView: View {
                         } else {
                             // Logged-in card
                             LoggedInProfileCard(displayName: displayName)
-                            .padding(.horizontal, 16)
+                                .padding(.horizontal, 16)
                         }
                         
                         // FEEDBACK + LINKS SECTION
@@ -127,7 +128,46 @@ struct ProfileView: View {
                         .padding(.horizontal, 16)
                         .padding(.top, -5)
                         
-                        Spacer(minLength: 12)
+                        // SIGN OUT (bottom)
+                        if isSignedIn {
+                            Button(role: .destructive) {
+                                showSignOutAlert = true
+                            } label: {
+                                HStack {
+                                    Spacer()
+                                    Text("Sign Out")
+                                        .foregroundColor(.red)
+                                        .font(.headline)
+                                    Spacer()
+                                }
+                                .padding(.vertical, 12)
+                                .padding(.horizontal, 12)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 18)
+                                        .fill(.ultraThinMaterial)
+                                        .opacity(0.6)
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 18)
+                                        .stroke(Color.white.opacity(0.15), lineWidth: 1)
+                                )
+                                .foregroundColor(.white)
+                            }
+                            .padding(.horizontal, 16)
+                            .alert("Sign out?", isPresented: $showSignOutAlert) {
+                                Button("Cancel", role: .cancel) {}
+                                Button("Sign Out", role: .destructive) {
+                                    withAnimation(.spring()) {
+                                        isSignedIn = false
+                                        displayName = ""
+                                    }
+                                }
+                            } message: {
+                                Text("You will be signed out on this device. Your local data will remain.")
+                            }
+                        }
+                        
+                        Spacer(minLength: 24)
                     }
                     .padding(.top, 16)
                     .padding(.bottom, 24)

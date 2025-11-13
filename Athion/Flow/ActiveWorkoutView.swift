@@ -128,6 +128,7 @@ struct ActiveWorkoutView: View {
             .interactiveDismissDisabled(true)
             .navigationTitle("Log activity")
             .navigationBarTitleDisplayMode(.inline)
+            .keyboardDismissToolbar()
         }
         .onAppear(perform: bootstrap)
     }

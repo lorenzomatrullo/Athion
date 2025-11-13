@@ -156,6 +156,7 @@ struct SessionOverviewView: View {
                 sessionName = record.name
             }
         }
+        .keyboardDismissToolbar()
     }
     
     private func enterEditMode() {
