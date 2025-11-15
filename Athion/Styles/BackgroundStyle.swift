@@ -1,5 +1,4 @@
 import SwiftUI
-import UIKit
 
 struct CustomBackgroundView: View {
     var body: some View {

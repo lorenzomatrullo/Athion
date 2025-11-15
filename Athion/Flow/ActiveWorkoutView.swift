@@ -61,13 +61,13 @@ struct ActiveWorkoutView: View {
                                 
                                 ForEach(Array(ex.sets.enumerated()), id: \.element.id) { idx, set in
                                     HStack(spacing: 12) {
-                                        // Completion gate: both weight and reps must be provided and set not already completed
+                                        // Require weight and reps; ignore already completed
                                         let isFilled = !set.weightKg.trimmingCharacters(in: .whitespaces).isEmpty
                                         && !set.reps.trimmingCharacters(in: .whitespaces).isEmpty
                                         let canComplete = isFilled && !set.isCompleted
                                         let showDisabledLook = !isFilled && !set.isCompleted
                                         
-                                        // Set number bullet
+                                        // Set index bullet
                                         ZStack {
                                             Circle()
                                                 .strokeBorder(Color.white.opacity(0.25), lineWidth: 1)
@@ -78,7 +78,7 @@ struct ActiveWorkoutView: View {
                                                 .fontWeight(.semibold)
                                         }
                                         
-                                        // Weight field (kg)
+                                        // Weight (kg) with previous ghost prompt
                                         HStack {
                                             let wPrompt = prevByExerciseAndSet[ex.name]?[idx]?.weight ?? "0"
                                             TextField("", text: bindingForSet(exerciseId: ex.id, setId: set.id, keyPath: \.weightKg), prompt: Text(wPrompt))
@@ -91,7 +91,7 @@ struct ActiveWorkoutView: View {
                                         .padding(.horizontal, 12)
                                         .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 12))
                                         
-                                        // Reps field
+                                        // Reps with previous ghost prompt
                                         HStack {
                                             let rPrompt = prevByExerciseAndSet[ex.name]?[idx]?.reps ?? "0"
                                             TextField("", text: bindingForSet(exerciseId: ex.id, setId: set.id, keyPath: \.reps), prompt: Text(rPrompt))
@@ -104,7 +104,7 @@ struct ActiveWorkoutView: View {
                                         .padding(.horizontal, 12)
                                         .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 12))
                                         
-                                        // Done button (UI only; match set-number circle style and size)
+                                        // Done button styled like set bullet
                                         Button(action: {
                                             if canComplete {
                                                 completeSet(exerciseId: ex.id, setId: set.id)
@@ -126,7 +126,7 @@ struct ActiveWorkoutView: View {
                                         }
                                         .padding(.leading, 8) // tighter gap next to reps field
                                         .buttonStyle(.plain)
-                                        // Default state (not filled) uses disabled look; completed green keeps full look but is not tappable
+                                        // Default muted; completed non-tappable
                                         .disabled(showDisabledLook)
                                         .allowsHitTesting(canComplete) // ignore taps unless we can complete
                                     }
@@ -178,17 +178,18 @@ struct ActiveWorkoutView: View {
     }
     
     private func bootstrap() {
-        // Build transient entries from the session's exercises (sorted by orderIndex)
+        // Build transient entries sorted by orderIndex
         let source = (record.exercises ?? []).sorted { $0.orderIndex < $1.orderIndex }
         exercises = source.map { ex in
             let setCount = max(1, ex.sets)
-            // Start reps empty so the user can input completed reps, while the header shows the planned range.
+            // Start reps empty; header shows plan
             let sets = Array(0..<setCount).map { _ in SetEntry(weightKg: "", reps: "", isCompleted: false) }
             return ExerciseEntry(name: ex.name, repsRange: ex.reps, sets: sets)
         }
     }
     
     private func loadPrevious() {
+        // Cache last logged values for ghost prompts
         var lookup: [String: [Int: Previous]] = [:]
         for ex in exercises {
             for (idx, _) in ex.sets.enumerated() {
@@ -232,12 +233,13 @@ struct ActiveWorkoutView: View {
     private func completeSet(exerciseId: UUID, setId: UUID) {
         guard let exIndex = exercises.firstIndex(where: { $0.id == exerciseId }),
               let setIndex = exercises[exIndex].sets.firstIndex(where: { $0.id == setId }) else { return }
-        // If already completed, do nothing (cannot undo)
+        // Ignore taps if already completed (no undo)
         if exercises[exIndex].sets[setIndex].isCompleted { return }
         exercises[exIndex].sets[setIndex].isCompleted = true
     }
     
     private func saveLogs() {
+        // Persist completed sets only
         for ex in exercises {
             for (idx, set) in ex.sets.enumerated() where set.isCompleted {
                 let weight = Double(set.weightKg) ?? 0

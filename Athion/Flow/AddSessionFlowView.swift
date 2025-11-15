@@ -58,7 +58,7 @@ struct AddSessionFlowView: View {
                             .foregroundColor(.white)
                             .padding(.horizontal, 16)
                         
-                        // Exercises overview (shown ABOVE add button)
+                        // Exercises list (above Add)
                         if !exercises.isEmpty {
                             ExercisesList(
                                 exercises: $exercises,
@@ -70,15 +70,14 @@ struct AddSessionFlowView: View {
                             .padding(.horizontal, 16)
                         }
                         
-                        // Inline exercise entry card
+                        // Inline add form (new exercise)
                         if isAddingExercise {
                             AddingExerciseCard(name: $exName, setsText: $exSetsText, reps: $exReps, onSave: saveExercise, canSave: canSaveExercise)
                                 .padding(.horizontal, 16)
                         }
                         
-                        // Add Exercise button
+                        // Begin add flow
                         Button(action: {
-                            // Start a fresh add; clear fields and reset editing state
                             dismissKeyboard()
                             exName = ""
                             exSetsText = ""
@@ -103,7 +102,7 @@ struct AddSessionFlowView: View {
                     .padding(.top, 16)
                     .padding(.bottom, 24)
                 }
-                // Dismiss keyboard on background tap/drag to avoid remote input warnings
+                // Dismiss keyboard on background interactions
                 .onTapGesture { dismissKeyboard() }
                 .simultaneousGesture(
                     DragGesture().onChanged { _ in dismissKeyboard() }
@@ -133,7 +132,7 @@ struct AddSessionFlowView: View {
         dismissKeyboard()
         let trimmedName = exName.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedReps = exReps.trimmingCharacters(in: .whitespacesAndNewlines)
-        // Insert new exercise (editing handled inside ExercisesList)
+        // Append new exercise; editing handled in list
         let ex = Exercise(name: trimmedName, sets: exSets, reps: trimmedReps)
         exercises.append(ex)
         exName = ""
